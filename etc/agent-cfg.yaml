@@ -1,0 +1,135 @@
+# A production config for Grafana Agent which supported by flashcatcloud inc.
+# For a full configuration reference, see: 
+# https://github.com/grafana/agent/tree/main/docs/user/configuration/integrations
+server:
+  http_listen_address: '127.0.0.1'
+  http_listen_port: 12345
+
+metrics:
+  global:
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    remote_write:
+      - url: http://10.206.0.16:8480/insert/0/prometheus/api/v1/write
+  # TODO: use dedicated user and wal_dir
+  wal_directory: '/tmp/fc-agent'
+
+  configs:
+    ## Example Prometheus scrape configuration to scrape the agent itself for metrics.
+    ## This is not needed if the agent integration is enabled.
+    ## More detail about scape_configs, see: 
+    ## https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config
+    ## You can set multiple scrape_configs to scrape from different targets and write 
+    ## to different remotes. of course you can also configure multiple jobs in one scrape_config.
+    ##
+    # - name: fc-agent
+    #   host_filter: false
+    #   scrape_configs:
+    #     - job_name: fc-agent
+    #       static_configs:
+    #         - targets: ['127.0.0.1:12345']
+    #
+    #   remote_write:
+    #     - url: http://10.206.0.16:8480/insert/0/prometheus/api/v1/write
+    # - name: outside-exporters
+    #   host_filter: false
+    #   scrape_configs:
+    #     - job_name: prometheus
+    #       static_configs:
+    #         - targets: ['127.0.0.1:9090']
+    #           labels:
+    #             cluster: 'fc-monitoring'
+    #
+    #   remote_write:
+    #     - url: http://localhost:8480/insert/0/prometheus/api/v1/write
+
+integrations:
+  # fc-agent self integration
+  agent:
+    enabled: true
+
+  # node_exporter integration
+  # Enables the node_exporter integration, allowing the Agent to automatically
+  # collect system metrics from the host UNIX system.
+  node_exporter:
+    enabled: true
+
+    # Monitor the exporter itself and include those metrics in the results.
+    include_exporter_metrics: true
+
+    ## The default value for this integration is inferred from the agent hostname
+    ## and HTTP listen port, delimited by a colon.
+    ## the hostname first retrieved from $HOSTNAME if defined in ENV,
+    ## and fall back to Go's os.Hostname
+    # [instance: <string>]
+
+    ## Allows for relabeling labels on the target.
+    # relabel_configs:
+    #  [- <relabel_config> ... ]
+
+    ## Relabel metrics coming from the integration, allowing to drop series
+    ## from the integration that you don't care about.
+    #metric_relabel_configs:
+    #  [- <relabel_config> ... ]
+
+
+  # Enables the cadvisor integration, allowing the Agent to automatically
+  # collect metrics for the container
+  cadvisor:
+    enabled: true
+
+  # Controls the process_exporter integration
+  process_exporter:
+    enabled: false
+  
+  # Controls the mysqld_exporter integration
+  mysqld_exporter:
+    enabled: false
+  
+  # Controls the redis_exporter integration
+  redis_exporter:
+    enabled: false
+  
+  # Controls the dnsmasq_exporter integration
+  dnsmasq_exporter:
+    enabled: false
+  
+  # Controls the elasticsearch_expoter integration
+  elasticsearch_expoter:
+    enabled: false
+  
+  # Controls the memcached_exporter integration
+  memcached_exporter:
+    enabled: false
+  
+  # Controls the postgres_exporter integration
+  postgres_exporter:
+    enabled: false
+  
+  # Controls the statsd_exporter integration
+  statsd_exporter:
+    enabled: false
+  
+  # Controls the consul_exporter integration
+  consul_exporter:
+    enabled: false
+  
+  # Controls the windows_exporter integration
+  windows_exporter:
+    enabled: false
+  
+  # Controls the kafka_exporter integration
+  kafka_exporter:
+    enabled: false
+  
+  # Controls the mongodb_exporter integration
+  mongodb_exporter:
+    enabled: false
+
+  # Controls the github_exporter integration
+  github_exporter:
+    enabled: false
+  
+  ## Extra labels to add to all samples coming from integrations.
+  # labels:
+  #   { <string>: <string> }

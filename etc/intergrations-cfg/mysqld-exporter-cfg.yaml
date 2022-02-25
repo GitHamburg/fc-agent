@@ -1,0 +1,118 @@
+# The `mysqld_exporter_config` block configures the `mysqld_exporter` integration,
+# which is an embedded version of
+# [`mysqld_exporter`](https://github.com/prometheus/mysqld_exporter)
+# and allows for collection metrics from MySQL servers.
+# 
+# Note that currently, an Agent can only collect metrics from a single MySQL
+# server. If you want to collect metrics from multiple servers, run multiple
+# Agents and add labels using `relabel_configs` to differentiate between the MySQL
+# servers:
+
+server:
+  http_listen_address: '127.0.0.1'
+  http_listen_port: 12345
+       
+metrics:
+  global:
+    scrape_interval: 15s 
+    scrape_timeout: 10s 
+    remote_write:
+      - url: http://localhost:8480/insert/0/prometheus/api/v1/write
+  wal_directory: '/tmp/fc-agent'
+
+integrations:
+  mysqld_exporter:
+    # Enables the mysqld_exporter integration, allowing the Agent to collect
+    # metrics from a MySQL server.
+    [enabled: <boolean> | default = false]
+
+    # Sets an explicit value for the instance label when the integration is
+    # self-scraped. Overrides inferred values.
+    #
+    # The default value for this integration is a truncated version of the
+    # connection DSN, containing only the server and db name. (Credentials
+    # are not included.)
+    [instance: <string>]
+
+    # Automatically collect metrics from this integration. If disabled,
+    # the mysqld_exporter integration will be run but not scraped and thus not
+    # remote-written. Metrics for the integration will be exposed at
+    # /integrations/mysqld_exporter/metrics and can be scraped by an external
+    # process.
+    [scrape_integration: <boolean> | default = <integrations_config.scrape_integrations>]
+
+    # How often should the metrics be collected? Defaults to
+    # prometheus.global.scrape_interval.
+    [scrape_interval: <duration> | default = <global_config.scrape_interval>]
+
+    # The timeout before considering the scrape a failure. Defaults to
+    # prometheus.global.scrape_timeout.
+    [scrape_timeout: <duration> | default = <global_config.scrape_timeout>]
+
+    # Allows for relabeling labels on the target.
+    relabel_configs:
+      [- <relabel_config> ... ]
+
+    # Relabel metrics coming from the integration, allowing to drop series
+    # from the integration that you don't care about.
+    metric_relabel_configs:
+      [ - <relabel_config> ... ]
+
+    # How frequent to truncate the WAL for this integration.
+    [wal_truncate_frequency: <duration> | default = "60m"]
+
+    # Data Source Name specifies the MySQL server to connect to. This is REQUIRED
+    # but may also be specified by the MYSQLD_EXPORTER_DATA_SOURCE_NAME
+    # environment variable. If neither are set, the integration will fail to
+    # start.
+    #
+    # The format of this is specified here: https://github.com/go-sql-driver/mysql#dsn-data-source-name
+    #
+    # A working example value for a server with no required password
+    # authentication is: "root@(localhost:3306)/"
+    data_source_name: <string>
+
+    # A list of collector names to enable on top of the default set.
+    enable_collectors:
+      [ - <string> ]
+    # A list of collector names to disable from the default set.
+    disable_collectors:
+      [ - <string> ]
+    # A list of collectors to run. Fully overrides the default set.
+    set_collectors:
+      [ - <string> ]
+
+    # Set a lock_wait_timeout on the connection to avoid long metadata locking.
+    [lock_wait_timeout: <int> | default = 2]
+    # Add a low_slow_filter to avoid slow query logging of scrapes. NOT supported
+    # by Oracle MySQL.
+    [log_slow_filter: <bool> | default = false]
+
+    ## Collector-specific options
+
+    # Minimum time a thread must be in each state to be counted.
+    [info_schema_processlist_min_time: <int> | default = 0]
+    # Enable collecting the number of processes by user.
+    [info_schema_processlist_processes_by_user: <bool> | default = true]
+    # Enable collecting the number of processes by host.
+    [info_schema_processlist_processes_by_host: <bool> | default = true]
+    # The list of databases to collect table stats for. * for all
+    [info_schema_tables_databases: <string> | default = "*"]
+    # Limit the number of events statements digests by response time.
+    [perf_schema_eventsstatements_limit: <int> | default = 250]
+    # Limit how old the 'last_seen' events statements can be, in seconds.
+    [perf_schema_eventsstatements_time_limit: <int> | default = 86400]
+    # Maximum length of the normalized statement text.
+    [perf_schema_eventsstatements_digtext_text_limit: <int> | default = 120]
+    # Regex file_name filter for performance_schema.file_summary_by_instance
+    [perf_schema_file_instances_filter: <string> | default = ".*"]
+    # Remove path prefix in performance_schema.file_summary_by_instance
+    [perf_schema_file_instances_remove_prefix: <string> | default = "/var/lib/mysql"]
+    # Database from where to collect heartbeat data.
+    [heartbeat_database: <string> | default = "heartbeat"]
+    # Table from where to collect heartbeat data.
+    [heartbeat_table: <string> | default = "heartbeat"]
+    # Use UTC for timestamps of the current server (`pt-heartbeat` is called with `--utc`)
+    [heartbeat_utc: <bool> | default = false]
+    # Enable collecting user privileges from mysql.user
+    [mysql_user_privileges: <bool> | default = false]

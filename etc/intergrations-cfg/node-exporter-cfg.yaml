@@ -1,0 +1,223 @@
+# The `node_exporter_config` block configures the `node_exporter` integration,
+# which is an embedded version of
+# [`node_exporter`](https://github.com/prometheus/node_exporter)
+# and allows for collecting metrics from the UNIX system that `node_exporter` is
+# running on. It provides a significant amount of collectors that are responsible
+# for monitoring various aspects of the host system.
+
+server:
+  http_listen_address: '127.0.0.1'
+  http_listen_port: 12345
+       
+metrics:
+  global:
+    scrape_interval: 15s 
+    scrape_timeout: 10s 
+    remote_write:
+      - url: http://localhost:8480/insert/0/prometheus/api/v1/write
+  wal_directory: '/tmp/fc-agent'
+
+integrations:
+  cadvisor:
+    # Enables the node_exporter integration, allowing the Agent to automatically
+    # collect system metrics from the host UNIX system.
+    [enabled: <boolean> | default = false]
+
+    # Sets an explicit value for the instance label when the integration is
+    # self-scraped. Overrides inferred values.
+    #
+    # The default value for this integration is inferred from the agent hostname
+    # and HTTP listen port, delimited by a colon.
+    [instance: <string>]
+
+    # Automatically collect metrics from this integration. If disabled,
+    # the node_exporter integration will be run but not scraped and thus not remote-written. Metrics for the
+    # integration will be exposed at /integrations/node_exporter/metrics and can
+    # be scraped by an external process.
+    [scrape_integration: <boolean> | default = <integrations_config.scrape_integrations>]
+
+    # How often should the metrics be collected? Defaults to
+    # prometheus.global.scrape_interval.
+    [scrape_interval: <duration> | default = <global_config.scrape_interval>]
+
+    # The timtout before considering the scrape a failure. Defaults to
+    # prometheus.global.scrape_timeout.
+    [scrape_timeout: <duration> | default = <global_config.scrape_timeout>]
+
+    # Allows for relabeling labels on the target.
+    relabel_configs:
+      [- <relabel_config> ... ]
+
+    # Relabel metrics coming from the integration, allowing to drop series
+    # from the integration that you don't care about.
+    metric_relabel_configs:
+      [ - <relabel_config> ... ]
+
+    # How frequent to truncate the WAL for this integration.
+    [wal_truncate_frequency: <duration> | default = "60m"]
+
+    # Monitor the exporter itself and include those metrics in the results.
+    [include_exporter_metrics: <boolean> | default = false]
+
+    # Optionally defines the the list of enabled-by-default collectors.
+    # Anything not provided in the list below will be disabled by default,
+    # but requires at least one element to be treated as defined.
+    #
+    # This is useful if you have a very explicit set of collectors you wish
+    # to run.
+    set_collectors:
+      - [<string>]
+
+    # Additional collectors to enable on top of the default set of enabled
+    # collectors or on top of the list provided by set_collectors.
+    #
+    # This is useful if you have a few collectors you wish to run that are
+    # not enabled by default, but do not want to explicitly provide an entire
+    # list through set_collectors.
+    enable_collectors:
+      - [<string>]
+
+    # Additional collectors to disable on top of the default set of disabled
+    # collectors. Takes precedence over enable_collectors.
+    #
+    # This is useful if you have a few collectors you do not want to run that
+    # are enabled by default, but do not want to explicitly provide an entire
+    # list through set_collectors.
+    disable_collectors:
+      - [<string>]
+
+    # procfs mountpoint.
+    [procfs_path: <string> | default = "/proc"]
+
+    # sysfs mountpoint.
+    [sysfs_path: <string> | default = "/sys"]
+
+    # rootfs mountpoint. If running in docker, the root filesystem of the host
+    # machine should be mounted and this value should be changed to the mount
+    # directory.
+    [rootfs_path: <string> | default = "/"]
+
+    # Expose expensive bcache priority stats.
+    [enable_bcache_priority_stats: <boolean>]
+
+    # Regexp of `bugs` field in cpu info to filter.
+    [cpu_bugs_include: <string>]
+
+    # Enable the node_cpu_guest_seconds_total metric.
+    [enable_cpu_guest_seconds_metric: <boolean> | default = true]
+
+    # Enable the cpu_info metric for the cpu collector.
+    [enable_cpu_info_metric: <boolean> | default = true]
+
+    # Regexp of `flags` field in cpu info to filter.
+    [cpu_flags_include: <string>]
+
+    # Regexmp of devices to ignore for diskstats.
+    [diskstats_ignored_devices: <string> | default = "^(ram|loop|fd|(h|s|v|xv)d[a-z]|nvme\\d+n\\d+p)\\d+$"]
+
+    # Regexp of ethtool devices to exclude (mutually exclusive with ethtool_device_include)
+    [ethtool_device_exclude: <string>]
+
+    # Regexp of ethtool devices to include (mutually exclusive with ethtool_device_exclude)
+    [ethtool_device_include: <string>]
+
+    # Regexp of ethtool stats to include.
+    [ethtool_metrics_include: <string> | default = ".*"]
+
+    # Regexp of mount points to ignore for filesystem collector.
+    [filesystem_mount_points_exclude: <string> | default = "^/(dev|proc|sys|var/lib/docker/.+)($|/)"]
+
+    # Regexp of filesystem types to ignore for filesystem collector.
+    [filesystem_fs_types_exclude: <string> | default = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"]
+
+    # How long to wait for a mount to respond before marking it as stale.
+    [filesystem_mount_timeout: <duration> | default = "5s"]
+
+    # Array of IPVS backend stats labels.
+    #
+    # The default is [local_address, local_port, remote_address, remote_port, proto, local_mark].
+    ipvs_backend_labels:
+      [- <string>]
+
+    # NTP server to use for ntp collector
+    [ntp_server: <string> | default = "127.0.0.1"]
+
+    # NTP protocol version
+    [ntp_protocol_version: <int> | default = 4]
+
+    # Certify that the server address is not a public ntp server.
+    [ntp_server_is_local: <boolean> | default = false]
+
+    # IP TTL to use wile sending NTP query.
+    [ntp_ip_ttl: <int> | default = 1]
+
+    # Max accumulated distance to the root.
+    [ntp_max_distance: <duration> | default = "3466080us"]
+
+    # Offset between local clock and local ntpd time to tolerate.
+    [ntp_local_offset_tolerance: <duration> | default = "1ms"]
+
+    # Regexp of net devices to ignore for netclass collector.
+    [netclass_ignored_devices: <string> | default = "^$"]
+
+    # Ignore net devices with invalid speed values. This will default to true in
+    # node_exporter 2.0.
+    [netclass_ignore_invalid_speed_device: <boolean> | default = false]
+
+    # Enable collecting address-info for every device.
+    [netdev_address_info: <boolean>]
+
+    # Regexp of net devices to exclude (mutually exclusive with include)
+    [netdev_device_exclude: <string> | default = ""]
+
+    # Regexp of net devices to include (mutually exclusive with exclude)
+    [netdev_device_include: <string> | default = ""]
+
+    # Regexp of fields to return for netstat collector.
+    [netstat_fields: <string> | default = "^(.*_(InErrors|InErrs)|Ip_Forwarding|Ip(6|Ext)_(InOctets|OutOctets)|Icmp6?_(InMsgs|OutMsgs)|TcpExt_(Listen.*|Syncookies.*|TCPSynRetrans|TCPTimeouts)|Tcp_(ActiveOpens|InSegs|OutSegs|OutRsts|PassiveOpens|RetransSegs|CurrEstab)|Udp6?_(InDatagrams|OutDatagrams|NoPorts|RcvbufErrors|SndbufErrors))$"]
+
+    # List of CPUs from which perf metrics should be collected.
+    [perf_cpus: <string> | default = ""]
+
+    # Array of perf tracepoints that should be collected.
+    perf_tracepoint:
+      [- <string>]
+
+    # Regexp of power supplies to ignore for the powersupplyclass collector.
+    [powersupply_ignored_supplies: <string> | default = "^$"]
+
+    # Path to runit service directory.
+    [runit_service_dir: <string> | default = "/etc/service"]
+
+    # XML RPC endpoint for the supervisord collector.
+    #
+    # Setting SUPERVISORD_URL in the environment will override the default value.
+    # An explicit value in the YAML config takes precedence over the environment
+    # variable.
+    [supervisord_url: <string> | default = "http://localhost:9001/RPC2"]
+
+    # Regexp of systemd units to include. Units must both match include and not
+    # match exclude to be collected.
+    [systemd_unit_include: <string> | default = ".+"]
+
+    # Regexp of systemd units to exclude. Units must both match include and not
+    # match exclude to be collected.
+    [systemd_unit_exclude: <string> | default = ".+\\.(automount|device|mount|scope|slice)"]
+
+    # Enables service unit tasks metrics unit_tasks_current and unit_tasks_max
+    [systemd_enable_task_metrics: <boolean> | default = false]
+
+    # Enables service unit metric service_restart_total
+    [systemd_enable_restarts_metrics: <boolean> | default = false]
+
+    # Enables service unit metric unit_start_time_seconds
+    [systemd_enable_start_time_metrics: <boolean> | default = false]
+
+    # Regexp of tapestats devices to ignore.
+    [tapestats_ignored_devices: <string> | default = "^$"]
+
+    # Directory to read *.prom files from for the textfile collector.
+    [textfile_directory: <string> | default = ""]
+
+    # Regexp of fields to return for the vmstat collector.
+    [vmstat_fields: <string> | default = "^(oom_kill|pgpg|pswp|pg.*fault).*"]
