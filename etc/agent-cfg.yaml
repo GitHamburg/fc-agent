@@ -1,25 +1,31 @@
+#
 # A production config for Grafana Agent which supported by flashcatcloud inc.
-# For a full configuration reference, see: 
+# For a full configuration reference, see:
 # https://github.com/grafana/agent/tree/main/docs/user/configuration/integrations
+#
 server:
   http_listen_address: '127.0.0.1'
   http_listen_port: 12345
 
 metrics:
+  wal_directory: '/tmp/fc-agent-12345'
   global:
     scrape_interval: 15s
     scrape_timeout: 10s
+    #
+    # TODO: set remote as https://flashc.at/api/v1/prom/write and basic_auth
+    # when you using fc-agent writting to flashcatcloud.
+    #
     remote_write:
       - url: http://10.206.0.16:8480/insert/0/prometheus/api/v1/write
-  # TODO: use dedicated user and wal_dir
-  wal_directory: '/tmp/fc-agent'
 
   configs:
+    #
     ## Example Prometheus scrape configuration to scrape the agent itself for metrics.
     ## This is not needed if the agent integration is enabled.
-    ## More detail about scape_configs, see: 
+    ## More detail about scape_configs, see:
     ## https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config
-    ## You can set multiple scrape_configs to scrape from different targets and write 
+    ## You can set multiple scrape_configs to scrape from different targets and write
     ## to different remotes. of course you can also configure multiple jobs in one scrape_config.
     ##
     # - name: fc-agent
@@ -42,24 +48,38 @@ metrics:
     #
     #   remote_write:
     #     - url: http://localhost:8480/insert/0/prometheus/api/v1/write
+    #       basic_auth:
+    #         username: <string>
+    #         password: <secret>
 
 integrations:
+  #
   # fc-agent self integration
+  #
   agent:
     enabled: true
 
+  #
   # node_exporter integration
   # Enables the node_exporter integration, allowing the Agent to automatically
   # collect system metrics from the host UNIX system.
+  #
   node_exporter:
     enabled: true
 
+    #
     # Monitor the exporter itself and include those metrics in the results.
+    #
     include_exporter_metrics: true
 
+    disable_collectors:
+      - "thermal"
+      - "thermal_zone"
+
+    #
     ## The default value for this integration is inferred from the agent hostname
     ## and HTTP listen port, delimited by a colon.
-    ## the hostname first retrieved from $HOSTNAME if defined in ENV,
+    ## the hostname first retrieved from $HOSTNAME if defined in os.ENV,
     ## and fall back to Go's os.Hostname
     # [instance: <string>]
 
@@ -71,65 +91,96 @@ integrations:
     ## from the integration that you don't care about.
     #metric_relabel_configs:
     #  [- <relabel_config> ... ]
+    #
 
 
+  #
   # Enables the cadvisor integration, allowing the Agent to automatically
   # collect metrics for the container
+  #
   cadvisor:
-    enabled: true
+    enabled: false
 
+  #
   # Controls the process_exporter integration
+  #
   process_exporter:
     enabled: false
-  
+
+  #
   # Controls the mysqld_exporter integration
+  #
   mysqld_exporter:
     enabled: false
-  
+
+  #
   # Controls the redis_exporter integration
+  #
   redis_exporter:
     enabled: false
-  
+
+  #
   # Controls the dnsmasq_exporter integration
+  #
   dnsmasq_exporter:
     enabled: false
-  
-  # Controls the elasticsearch_expoter integration
-  elasticsearch_expoter:
+
+  #
+  # Controls the elasticsearch_exporter integration
+  #
+  elasticsearch_exporter:
     enabled: false
-  
+
+  #
   # Controls the memcached_exporter integration
+  #
   memcached_exporter:
     enabled: false
-  
+
+  #
   # Controls the postgres_exporter integration
+  #
   postgres_exporter:
     enabled: false
-  
+
+  #
   # Controls the statsd_exporter integration
+  #
   statsd_exporter:
     enabled: false
-  
+
+  #
   # Controls the consul_exporter integration
+  #
   consul_exporter:
     enabled: false
-  
+
+  #
   # Controls the windows_exporter integration
+  #
   windows_exporter:
     enabled: false
-  
+
+  #
   # Controls the kafka_exporter integration
+  #
   kafka_exporter:
     enabled: false
-  
+
+  #
   # Controls the mongodb_exporter integration
+  #
   mongodb_exporter:
     enabled: false
 
+  #
   # Controls the github_exporter integration
+  #
   github_exporter:
     enabled: false
-  
+
+  #
   ## Extra labels to add to all samples coming from integrations.
   # labels:
   #   { <string>: <string> }
+  #
