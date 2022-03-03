@@ -1,3 +1,4 @@
+#
 # The `cadvisor_config` block configures the `cadvisor` integration,
 # which is an embedded version of
 # [`cadvisor`](https://github.com/google/cadvisor). This allows for the collection of container utilization metrics.
@@ -7,19 +8,7 @@
 # 
 # A good example of the required file, and system permissions can be found in the docker
 # run command published in the [cAdvisor docs](https://github.com/google/cadvisor#quick-start-running-cadvisor-in-a-docker-container).
-
-server:
-  http_listen_address: '127.0.0.1'
-  http_listen_port: 12345
-       
-metrics:
-  global:
-    scrape_interval: 15s 
-    scrape_timeout: 10s 
-    remote_write:
-      - url: http://localhost:8480/insert/0/prometheus/api/v1/write
-  wal_directory: '/tmp/fc-agent'
-
+#
 integrations:
   cadvisor:
     # Enables the cadvisor integration, allowing the Agent to automatically

@@ -1,3 +1,4 @@
+#
 # The `elasticsearch_exporter_config` block configures the `elasticsearch_exporter` integration,
 # which is an embedded version of
 # [`elasticsearch_exporter`](https://github.com/prometheus-community/elasticsearch_exporter). This allows for
@@ -9,19 +10,7 @@
 # We strongly recommend that you configure a separate user for the Agent, and give it only the strictly mandatory
 # security privileges necessary for monitoring your node, 
 # as per the [official documentation](https://github.com/prometheus-community/elasticsearch_exporter#elasticsearch-7x-security-privileges).
-
-server:
-  http_listen_address: '127.0.0.1'
-  http_listen_port: 12345
-       
-metrics:
-  global:
-    scrape_interval: 15s 
-    scrape_timeout: 10s 
-    remote_write:
-      - url: http://localhost:8480/insert/0/prometheus/api/v1/write
-  wal_directory: '/tmp/fc-agent'
-
+#
 integrations:
   elasticsearch_exporter:
     # Enables the elasticsearch_exporter integration, allowing the Agent to automatically

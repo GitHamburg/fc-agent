@@ -1,3 +1,4 @@
+#
 # The `mysqld_exporter_config` block configures the `mysqld_exporter` integration,
 # which is an embedded version of
 # [`mysqld_exporter`](https://github.com/prometheus/mysqld_exporter)
@@ -7,19 +8,7 @@
 # server. If you want to collect metrics from multiple servers, run multiple
 # Agents and add labels using `relabel_configs` to differentiate between the MySQL
 # servers:
-
-server:
-  http_listen_address: '127.0.0.1'
-  http_listen_port: 12345
-       
-metrics:
-  global:
-    scrape_interval: 15s 
-    scrape_timeout: 10s 
-    remote_write:
-      - url: http://localhost:8480/insert/0/prometheus/api/v1/write
-  wal_directory: '/tmp/fc-agent'
-
+#
 integrations:
   mysqld_exporter:
     # Enables the mysqld_exporter integration, allowing the Agent to collect
