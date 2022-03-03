@@ -1,52 +1,41 @@
-# The `dnsmasq_exporter_config` block configures the `dnsmasq_exporter` integration,
-# which is an embedded version of
-# [`dnsmasq_exporter`](https://github.com/google/dnsmasq_exporter). This allows for
-# the collection of metrics from dnsmasq servers.
+#
+# The `memcached_exporter_config` block configures the `memcached_exporter`
+# integration, which is an embedded version of
+# [`memcached_exporter`](https://github.com/prometheus/memcached_exporter). This
+# allows for the collection of metrics from memcached servers.
 # 
-# Note that currently, an Agent can only collect metrics from a single dnsmasq
+# Note that currently, an Agent can only collect metrics from a single memcached
 # server. If you want to collect metrics from multiple servers, you can run
 # multiple Agents and add labels using `relabel_configs` to differentiate between
 # the servers:
-# 
+#
 # ```yaml
-# dnsmasq_exporter:
+# memcached_exporter:
 #   enabled: true
-#   dnsmasq_address: dnsmasq-a:53
+#   memcached_address: memcached-a:53
 #   relabel_configs:
 #   - source_labels: [__address__]
 #     target_label: instance
-#     replacement: dnsmasq-a
+#     replacement: memcached-a
 # ```
-
-server:
-  http_listen_address: '127.0.0.1'
-  http_listen_port: 12345
-       
-metrics:
-  global:
-    scrape_interval: 15s 
-    scrape_timeout: 10s 
-    remote_write:
-      - url: http://localhost:8480/insert/0/prometheus/api/v1/write
-  wal_directory: '/tmp/fc-agent'
-
+#
 integrations:
-  dnsmasq_exporter:
-    # Enables the dnsmasq_exporter integration, allowing the Agent to automatically
-    # collect system metrics from the configured dnsmasq server address
+  memcached_exporter:
+    # Enables the memcached_exporter integration, allowing the Agent to automatically
+    # collect system metrics from the configured memcached server address
     [enabled: <boolean> | default = false]
 
     # Sets an explicit value for the instance label when the integration is
     # self-scraped. Overrides inferred values.
     #
-    # The default value for this integration is inferred from the dnsmasq_address
-    # value.
+    # The default value for this integration is inferred from
+    # memcached_address.
     [instance: <string>]
 
     # Automatically collect metrics from this integration. If disabled,
-    # the dnsmasq_exporter integration will be run but not scraped and thus not
+    # the memcached_exporter integration will be run but not scraped and thus not
     # remote-written. Metrics for the integration will be exposed at
-    # /integrations/dnsmasq_exporter/metrics and can be scraped by an external
+    # /integrations/memcached_exporter/metrics and can be scraped by an external
     # process.
     [scrape_integration: <boolean> | default = <integrations_config.scrape_integrations>]
 
@@ -77,9 +66,8 @@ integrations:
     # Exporter-specific configuration options
     #
 
-    # Address of the dnsmasq server in host:port form.
-    [dnsmasq_address: <string> | default = "localhost:53"]
+    # Address of the memcached server in host:port form.
+    [memcached_address: <string> | default = "localhost:53"]
 
-    # Path to the dnsmasq leases file. If this file doesn't exist, scraping
-    # dnsmasq # will fail with an warning log message.
-    [leases_path: <string> | default = "/var/lib/misc/dnsmasq.leases"]
+    # Timeout for connecting to memcached.
+    [timeout: <duration> | default = "1s"]

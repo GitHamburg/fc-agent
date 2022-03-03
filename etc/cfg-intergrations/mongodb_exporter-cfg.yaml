@@ -1,3 +1,4 @@
+#
 # The `mongodb_exporter_config` block configures the `mongodb_exporter` integration,
 # which is an embedded version of percona's [`mongodb_exporter`](https://github.com/percona/mongodb_exporter).
 # 
@@ -8,7 +9,7 @@
 # The first one is service_name, which is how you identify this node in your cluster (example: ReplicaSet1-Node1).
 # The second one is mongodb_cluster, which is the name of your mongodb cluster, and must be set the same value for all nodes composing the cluster (example: prod-cluster).
 # Here`s an example:
-
+#
 # ```yaml
 # relabel_configs:
 #     - source_labels: [__address__]
@@ -21,19 +22,7 @@
 
 # We strongly recommend that you configure a separate user for the Agent, and give it only the strictly mandatory
 # security privileges necessary for monitoring your node, as per the [official documentation](https://github.com/percona/mongodb_exporter#permissions).
-
-server:
-  http_listen_address: '127.0.0.1'
-  http_listen_port: 12345
-       
-metrics:
-  global:
-    scrape_interval: 15s 
-    scrape_timeout: 10s 
-    remote_write:
-      - url: http://localhost:8480/insert/0/prometheus/api/v1/write
-  wal_directory: '/tmp/fc-agent'
-
+#
 integrations:
   mongodb_exporter:
     # Enables the mongodb_exporter integration
