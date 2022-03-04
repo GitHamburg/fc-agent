@@ -19,3 +19,4 @@ vendor
 buildx-v*
 cover*.out
 .uptodate
+*.swp
