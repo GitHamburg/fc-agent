@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fc-agent
+  namespace: ${NAMESPACE}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fc-agent
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fc-agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fc-agent
+subjects:
+- kind: ServiceAccount
+  name: fc-agent
+  namespace: ${NAMESPACE}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fc-agent
+  namespace: ${NAMESPACE}
+data:
+  agent.yaml: |
+    server:
+      log_level: info
+      http_listen_port: 12345
+
+    metrics:
+      global:
+        scrape_interval: 15s
+        remote_write:
+          - url: 'https://flashc.at/api/v1/prom/write'
+            basic_auth:
+              username: ${FC_USERNAME}
+              password: ${FC_PASSWORD}
+
+    integrations:
+      agent:
+        enabled: true
+      node_exporter:
+        enabled: true  
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fc-agent
+  namespace: ${NAMESPACE}
+spec:
+  minReadySeconds: 10
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: fc-agent
+  template:
+    metadata:
+      labels:
+        name: fc-agent
+    spec:
+      containers:
+      - args:
+        - -config.file=/etc/fc-agent/agent.yaml
+        - -metrics.wal-directory=/var/fc-agent/data
+        command:
+        - /bin/agent
+        env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        image: flashcat/agent:latest
+        imagePullPolicy: IfNotPresent
+        name: agent
+        ports:
+        - containerPort: 12345
+          name: http-metrics
+        volumeMounts:
+        - mountPath: /etc/fc-agent
+          name: fc-agent
+      serviceAccount: fc-agent
+      volumes:
+      - configMap:
+          name: fc-agent
+        name: fc-agent
