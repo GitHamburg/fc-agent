@@ -1,0 +1,102 @@
+server:
+  log_level: debug
+  http_listen_port: 12345
+
+metrics:
+  global:
+    scrape_interval: 1m
+  configs:
+    - name: test
+      host_filter: false
+      scrape_configs:
+        - job_name: crow
+          static_configs:
+            - targets: ['crow:8080']
+              labels:
+                cluster: 'docker_compose'
+                container: 'crow'
+                pod: 'crow'
+        - job_name: crow_validate
+          metrics_path: /validate
+          static_configs:
+            - targets: ['crow:8080']
+
+        - job_name: local_scrape
+          static_configs:
+            - targets: ['127.0.0.1:12345', '127.0.0.1:8889']
+              labels:
+                cluster: 'docker_compose'
+                container: 'agent'
+                pod: 'grafana-agent-local'
+        - job_name: cortex_scrape
+          static_configs:
+            - targets: ['cortex:9009']
+              labels:
+                cluster: 'docker_compose'
+                container: 'cortex'
+
+        - job_name: avalanche-1
+          static_configs:
+            - targets: ['avalanche-1:9001']
+              labels:
+                cluster: 'docker_compose'
+                container: 'avalanche-1'
+        - job_name: avalanche-2
+          static_configs:
+            - targets: ['avalanche-2:9001']
+              labels:
+                cluster: 'docker_compose'
+                container: 'avalanche-2'
+        - job_name: avalanche-3
+          static_configs:
+            - targets: ['avalanche-3:9001']
+              labels:
+                cluster: 'docker_compose'
+                container: 'avalanche-3'
+      remote_write:
+        - url: http://cortex:9009/api/prom/push
+
+logs:
+  configs:
+  - name: default
+    positions:
+      filename: /tmp/positions.yaml
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+    scrape_configs:
+    - job_name: system
+      static_configs:
+        - targets:
+          - localhost
+          labels:
+            job: varlogs
+            __path__: /var/log/*log
+
+traces:
+  configs:
+  - name: default
+    receivers:
+      jaeger:
+        protocols:
+          thrift_http:
+    attributes:
+      actions:
+      - action: upsert
+        key: env
+        value: prod
+    remote_write:
+      - endpoint: tempo:55680
+        insecure: true
+    batch:
+      timeout: 5s
+      send_batch_size: 100
+    automatic_logging:
+      backend: logs_instance
+      logs_instance_name: default
+      spans: true
+      processes: true
+      roots: true
+    spanmetrics:
+      handler_endpoint: 0.0.0.0:8889
+    service_graphs:
+      enabled: true

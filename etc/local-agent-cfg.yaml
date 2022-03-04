@@ -1,0 +1,33 @@
+#
+# A production config for Grafana Agent which supported by flashcatcloud inc.
+# For a full configuration reference, see: 
+# https://github.com/grafana/agent/tree/main/docs/user/configuration/integrations
+#
+server:
+  http_listen_address: '127.0.0.1'
+  http_listen_port: 12345
+
+metrics:
+  wal_directory: '/tmp/fc-agent-12345'
+  global:
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    # 
+    # TODO: set remote as https://flashc.at/api/v1/prom/write and basic_auth
+    # when you using fc-agent writting to flashcatcloud.
+    # 
+    remote_write:
+      - url: http://localhost:9090/api/v1/write
+
+integrations:
+  #
+  # fc-agent self integration
+  #
+  agent:
+    enabled: true
+
+  # 
+  # Extra labels to add to all samples coming from integrations.
+  #
+  labels:
+    cluster: "fc-localhost"

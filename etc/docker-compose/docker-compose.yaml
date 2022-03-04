@@ -1,0 +1,37 @@
+version: "2"
+services:
+  agent:
+    image: flashcat/agent:latest
+    volumes:
+      - ./etc:/etc/agent-cfg
+      - /var/log:/var/log
+    entrypoint:
+      - /bin/agent
+      - -config.file=/etc/agent-cfg/local-agent-cfg.yaml
+      - -prometheus.wal-directory=/tmp/agent/wal
+    ports:
+      - "12345:12345"
+
+  #
+  # Launch avalanche instances with a relatively low churn rate
+  #
+  avalanche-1:
+    image: quay.io/freshtracks.io/avalanche:latest
+    command:
+      - --metric-count=3000
+      - --series-interval=3600
+      - --metric-interval=7200
+
+  avalanche-2:
+    image: quay.io/freshtracks.io/avalanche:latest
+    command:
+      - --metric-count=3000
+      - --series-interval=3600
+      - --metric-interval=7200
+
+  avalanche-3:
+    image: quay.io/freshtracks.io/avalanche:latest
+    command:
+      - --metric-count=3000
+      - --series-interval=3600
+      - --metric-interval=7200
