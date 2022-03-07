@@ -66,7 +66,8 @@ CROSS_BUILD ?= false
 # as an environment variable.
 BUILD_IN_CONTAINER ?= true
 BUILD_IMAGE_VERSION := 0.13.0
-BUILD_IMAGE := $(IMAGE_PREFIX)/agent-build-image:$(BUILD_IMAGE_VERSION)
+# Still use grafana as prefix in the process of building
+BUILD_IMAGE := grafana/agent-build-image:$(BUILD_IMAGE_VERSION)
 
 # Enables the binary to be built with optimizations (i.e., doesn't strip the image of
 # symbols, etc.)
@@ -334,7 +335,7 @@ dist/$(BINARY_PREFIX)agent-windows-installer: dist/$(BINARY_PREFIX)agent-windows
 	cp ./dist/$(BINARY_PREFIX)agent-windows-amd64.exe ./packaging/windows
 	cp LICENSE ./packaging/windows
 ifeq ($(BUILD_IN_CONTAINER),true)
-	docker build -t windows_installer ./packaging/windows
+	docker build -t windows_installer -e BINARY_PREFIX=${BINARY_PREFIX} ./packaging/windows
 	docker run --rm -t -v "${PWD}:/home" -e VERSION=${RELEASE_TAG} windows_installer
 else
 	makensis -V4 -DVERSION=${RELEASE_TAG} -DOUT="../../dist/$(BINARY_PREFIX)agent-installer.exe" ./packaging/windows/install_script.nsis
@@ -393,7 +394,7 @@ ifneq (,$(findstring WIP,$(IMAGE_TAG)))
 	@echo "Cannot push a WIP image, commit changes first"; \
 	false
 endif
-	docker push $(IMAGE_PREFIX)/agent-build-image:$(BUILD_IMAGE_VERSION)
+	docker push $(BUILD_IMAGE):$(BUILD_IMAGE_VERSION)
 
 packaging/debian-systemd/.uptodate: $(wildcard packaging/debian-systemd/*)
 	docker pull $(IMAGE_PREFIX)/debian-systemd || docker build -t $(IMAGE_PREFIX)/debian-systemd $(@D)
