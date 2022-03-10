@@ -2,6 +2,7 @@
 
 export GRAFANA='flashcat'
 export BINARY_PREFIX='fc-'
-export RELEASE_TAG='fc-v0.1.0'
+export RELEASE_TAG='v1.0.0-rc1'
 
 make dist
+#make agent-image

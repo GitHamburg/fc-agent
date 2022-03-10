@@ -39,32 +39,6 @@ subjects:
   name: fc-agent
   namespace: ${NAMESPACE}
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: fc-agent
-  namespace: ${NAMESPACE}
-data:
-  agent.yaml: |
-    server:
-      log_level: info
-      http_listen_port: 12345
-
-    metrics:
-      global:
-        scrape_interval: 15s
-        remote_write:
-          - url: 'https://flashc.at/api/v1/prom/write'
-            basic_auth:
-              username: ${FC_USERNAME}
-              password: ${FC_PASSWORD}
-
-    integrations:
-      agent:
-        enabled: true
-      node_exporter:
-        enabled: true  
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -85,7 +59,6 @@ spec:
       containers:
       - args:
         - -config.file=/etc/fc-agent/agent.yaml
-        - -metrics.wal-directory=/var/fc-agent/data
         command:
         - /bin/agent
         env:
