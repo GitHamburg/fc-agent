@@ -26,7 +26,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-        image: flashcat/agent:latest
+        image: registry.flashcat.cloud/library/fc-agent:v1.0.0
         imagePullPolicy: IfNotPresent
         name: agent
         volumeMounts:
