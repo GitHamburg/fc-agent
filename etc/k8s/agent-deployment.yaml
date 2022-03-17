@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fc-agent
+  namespace: ${NAMESPACE}
+spec:
+  minReadySeconds: 10
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: fc-agent
+  template:
+    metadata:
+      labels:
+        name: fc-agent
+    spec:
+      containers:
+      - args:
+        - -config.file=/etc/fc-agent/agent.yaml
+        command:
+        - /bin/agent
+        env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        image: flashcat/agent:latest
+        imagePullPolicy: IfNotPresent
+        name: agent
+        volumeMounts:
+        - mountPath: /etc/fc-agent
+          name: fc-agent
+      serviceAccount: fc-agent
+      volumes:
+      - configMap:
+          name: fc-agent
+        name: fc-agent
