@@ -88,7 +88,7 @@ log_level: debug
 
 func TestConfigMakerWithExporter(t *testing.T) {
 	configStr := `
-windows_exporter:
+windows:
   enabled_collectors: one,two,three
 `
 	tDir := generatePath(t)
@@ -102,14 +102,14 @@ windows_exporter:
 	cmf := generateLoader(t, loaderCfg)
 	configs, err := cmf.processIntegrations()
 	require.NoError(t, err)
-	assert.Len(t, configs, 1)
+	require.Len(t, configs, 1)
 	wincfg, _ := configs[0].(v2.UpgradedConfig).LegacyConfig()
 	assert.True(t, wincfg.(*windows_exporter.Config).EnabledCollectors == "one,two,three")
 }
 
 func TestConfigMakerWithMultipleExporter(t *testing.T) {
 	configStr := `
-windows_exporter:
+windows:
   enabled_collectors: one,two,three
   instance: testinstance
 node_exporter:
@@ -146,7 +146,7 @@ node_exporter:
 
 func TestLoadingFromS3(t *testing.T) {
 	configStr := `
-windows_exporter:
+windows:
   enabled_collectors: one,two,three
   instance: testinstance
 `
@@ -167,7 +167,7 @@ windows_exporter:
 
 func TestMultiplex(t *testing.T) {
 	configStr := `
-redis_exporter_configs:
+redis_configs:
 - redis_addr: localhost:6379
   autoscrape:
     metric_relabel_configs: 
@@ -206,7 +206,7 @@ integrations:
   node_exporter: {}
 `
 	addIntegration := `
-windows_exporter: {}
+windows: {}
 `
 	tDir := generatePath(t)
 	writeFile(t, tDir, "agent-1.yml", configStr)
@@ -223,7 +223,7 @@ windows_exporter: {}
 	// Since the normal agent uses deferred parsing this is required to load the integration from agent-1.yml
 	err = cfg.Integrations.setVersion(integrationsVersion2)
 	require.NoError(t, err)
-	assert.True(t, cfg.Server.Flags.HTTP.ListenPort == 80)
+	assert.True(t, cfg.Server.Flags.HTTP.ListenPort == 12345)
 	assert.True(t, cfg.Server.LogLevel.String() == "debug")
 	assert.True(t, cfg.Metrics.WALDir == "/tmp/grafana-agent-normal")
 	assert.True(t, cfg.Metrics.Global.RemoteWrite[0].URL.String() == "https://www.example.com")
@@ -245,7 +245,7 @@ metrics:
     remote_write:
     - url: https://www.example.com
 integrations:
-  windows_exporter: {}
+  windows: {}
 `
 	serverStr := `
 http_listen_port: 1111

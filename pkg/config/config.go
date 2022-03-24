@@ -21,7 +21,6 @@ import (
 	"github.com/grafana/agent/pkg/traces"
 	"github.com/grafana/agent/pkg/util"
 	"github.com/grafana/dskit/kv/consul"
-	"github.com/grafana/dskit/kv/etcd"
 	"github.com/prometheus/common/config"
 	"github.com/prometheus/common/version"
 	"github.com/stretchr/testify/require"
@@ -55,12 +54,6 @@ type Config struct {
 	Integrations VersionedIntegrations `yaml:"integrations,omitempty"`
 	Traces       traces.Config         `yaml:"traces,omitempty"`
 	Logs         *logs.Config          `yaml:"logs,omitempty"`
-
-	// We support a secondary server just for the /-/reload endpoint, since
-	// invoking /-/reload against the primary server can cause the server
-	// to restart.
-	ReloadAddress string `yaml:"-"`
-	ReloadPort    int    `yaml:"-"`
 
 	// Deprecated fields user has used. Generated during UnmarshalYAML.
 	Deprecations []string `yaml:"-"`
@@ -135,9 +128,6 @@ func (c Config) MarshalYAML() (interface{}, error) {
 	enc.SetHook(func(in interface{}) (ok bool, out interface{}, err error) {
 		// Obscure the password fields for known types that do not obscure passwords.
 		switch v := in.(type) {
-		case etcd.Config:
-			v.Password = "<secret>"
-			return true, v, nil
 		case consul.Config:
 			v.ACLToken = "<secret>"
 			return true, v, nil
@@ -203,9 +193,6 @@ func (c *Config) Validate(fs *flag.FlagSet) error {
 func (c *Config) RegisterFlags(f *flag.FlagSet) {
 	c.Metrics.RegisterFlags(f)
 	c.Server.RegisterFlags(f)
-
-	f.StringVar(&c.ReloadAddress, "reload-addr", "127.0.0.1", "address to expose a secondary server for /-/reload on.")
-	f.IntVar(&c.ReloadPort, "reload-port", 0, "port to expose a secondary server for /-/reload on. 0 disables secondary server.")
 
 	f.StringVar(&c.BasicAuthUser, "config.url.basic-auth-user", "",
 		"basic auth username for fetching remote config. (requires remote-configs experiment to be enabled")
