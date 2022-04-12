@@ -25,7 +25,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-        image: registry.flashcat.cloud/library/fc-agent:v1.0.0
+        image: grafana/agent:v0.23.0
         imagePullPolicy: IfNotPresent
         name: agent
         volumeMounts:
