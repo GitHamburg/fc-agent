@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: fc-agent
+  name: grafana-agent
   namespace: ${NAMESPACE}
 spec:
   selector:
     matchLabels:
-      name: fc-agent
+      name: grafana-agent
   template:
     metadata:
       labels:
-        name: fc-agent
+        name: grafana-agent
     spec:
       tolerations:
       - key: node-role.kubernetes.io/master
@@ -18,7 +18,7 @@ spec:
         effect: NoSchedule
       containers:
       - args:
-        - -config.file=/etc/fc-agent/agent.yaml
+        - -config.file=/etc/grafana-agent/agent.yaml
         command:
         - /bin/agent
         env:
@@ -30,11 +30,11 @@ spec:
         imagePullPolicy: IfNotPresent
         name: agent
         volumeMounts:
-        - mountPath: /etc/fc-agent
-          name: fc-agent
-      serviceAccount: fc-agent
+        - mountPath: /etc/grafana-agent
+          name: grafana-agent
+      serviceAccount: grafana-agent
       terminationGracePeriodSeconds: 30
       volumes:
       - configMap:
-          name: fc-agent
-        name: fc-agent
+          name: grafana-agent
+        name: grafana-agent
